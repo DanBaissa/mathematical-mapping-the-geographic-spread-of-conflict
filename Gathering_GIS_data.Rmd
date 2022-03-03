@@ -1,0 +1,145 @@
+---
+title: "Merging Iraq and Syria Shapefiles"
+author: "Daniel K Baissa"
+date: "3/3/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Intro
+
+In this document I will merge the Iraq and Syria shapefiles into one joined shapefile.
+
+I will use the following libraries to join the shapefiles:
+
+```{r}
+library(rgdal)
+library(raster)
+```
+
+Let's load in the Iraq Shapefile first. I will use readOGR and then plot the shapefile to make sure it is working.
+
+```{r}
+Iraq <- readOGR("Shapefiles/Iraq", "pc284dt8747")
+plot(Iraq)
+```
+
+It is working. Now let's load in Syria.
+
+```{r}
+Syria <- readOGR("Shapefiles/Syria", "gk468fm4741")
+plot(Syria)
+```
+
+The Syria shapefile also loaded correctly.
+
+### Merging
+
+Now that we have our shapefiles, we can merge them using the bind() function.
+
+```{r}
+Iraq_and_Syria <- bind(Iraq, Syria)
+
+plot(Iraq_and_Syria)
+```
+
+Now let's save the merged shapefile.
+
+```{r}
+writeOGR(Iraq_and_Syria, "Shapefiles/Iraq_Syria_merged", "Iraq_and_Syria", driver = "ESRI Shapefile")
+```
+
+### Disolving the Polygons
+
+Now that we have the joined Iraq and Syria shapefile, I want a shapefile that disolves away the borded between the two countries. To do this I will use the aggregate() function.
+
+```{r}
+Iraq_Syria_joined <- aggregate(Iraq_and_Syria)
+
+plot(Iraq_Syria_joined)
+```
+
+Great! Now we have a polygon with Iraq and Syria joined and the border between the two dissolved.
+
+## Merging in the Raster data
+
+Now that we have the shapefile we can use it to cut out all of the data we need from the global raster. 
+
+
+I will start by gathering all of the rasters I will for Iraq and Syria. 
+
+```{r}
+ff <- list.files("Rasters/base_data", pattern = "\\.tif$", full=TRUE)
+```
+
+Since the rasters have different extents, I will need to crop them all individually and then save them to be stacked. 
+
+I will start by making a function that will crop and them mask the rasters. The reason I want to do both is because cropping limit's the extent of the raster, and masking sets all of the values outside of the shapefile to NA. Masking alone would result in a much wider extent and cropping would result in areas outside of the countries I am looking at.
+
+```{r}
+
+masked_crop <- function(r, shp){
+  ras <- raster(r)
+  cropped <- crop(ras, shp)
+  masked <- mask(cropped, shp)
+  
+  return(masked)
+}
+```
+
+Now let's try the function on the first raster
+
+
+```{r}
+
+bio12 <- masked_crop(ff[1], Iraq_Syria_joined)
+
+plot(bio12)
+```
+
+It is working!! Now let's do it for all of the rasters
+
+```{r}
+test <- raster(ff[1])
+test2 <- raster(ff[2])
+
+plot(test)
+plot(test2)
+```
+
+
+```{r}
+bio6 <- masked_crop(ff[2], Iraq_Syria_joined)
+land_use <- masked_crop(ff[3], Iraq_Syria_joined)
+Elev <- masked_crop(ff[4], Iraq_Syria_joined)
+```
+
+```{r}
+plot(bio6)
+plot(land_use)
+plot(Elev)
+```
+
+### Working with the rasters
+
+Now that we have cropped and masked the data, let's start working with them. 
+
+#### Ruggedness Index
+
+I will start by creating a ruggedness index for Iraq and Syria.
+
+```{r}
+
+```
+
+
+
+
+```{r}
+writeRaster(bio6,'Rasters/cropped_masked/bio6.tif', options=c('TFW=YES'))
+```
+
+
