@@ -1,0 +1,22 @@
+---
+title: "Merging Iraq and Syria Shapefiles"
+author: "Daniel K Baissa"
+date: "3/3/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Intro
+
+In this document I will merge the Iraq and Syria shapefiles into one joined shapefile.
+
+I will use the following libraries to join the shapefiles:
+
+```{r}
+library(rgdal)
+library(raster)
+```
+
