@@ -20,3 +20,53 @@ library(rgdal)
 library(raster)
 ```
 
+Let's load in the Iraq Shapefile first. I will use readOGR and then plot the shapefile to make sure it is working.
+
+```{r}
+Iraq <- readOGR("Shapefiles/Iraq", "pc284dt8747")
+plot(Iraq)
+```
+
+It is working. Now let's load in Syria.
+
+```{r}
+Syria <- readOGR("Shapefiles/Syria", "gk468fm4741")
+plot(Syria)
+```
+
+The Syria shapefile also loaded correctly.
+
+### Merging
+
+Now that we have our shapefiles, we can merge them using the bind() function.
+
+```{r}
+Iraq_and_Syria <- bind(Iraq, Syria)
+
+plot(Iraq_and_Syria)
+```
+
+Now let's save the merged shapefile.
+
+```{r}
+writeOGR(Iraq_and_Syria, "Shapefiles/Iraq_Syria_merged", "Iraq_and_Syria", driver = "ESRI Shapefile")
+```
+
+### Disolving the Polygons
+
+Now that we have the joined Iraq and Syria shapefile, I want a shapefile that disolves away the borded between the two countries. To do this I will use the aggregate() function.
+
+```{r}
+Iraq_Syria_joined <- aggregate(Iraq_and_Syria)
+
+plot(Iraq_Syria_joined)
+```
+
+Great! Now we have a polygon with Iraq and Syria joined and the border between the two disolved.
+
+Now let's save it!
+
+```{r}
+writeOGR(Iraq_Syria_joined, "Shapefiles/Iraq_Syria_merged", "Iraq_Syria_joined", driver = "ESRI Shapefile")
+```
+
