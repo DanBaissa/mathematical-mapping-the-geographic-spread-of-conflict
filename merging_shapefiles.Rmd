@@ -64,9 +64,5 @@ plot(Iraq_Syria_joined)
 
 Great! Now we have a polygon with Iraq and Syria joined and the border between the two disolved.
 
-Now let's save it!
 
-```{r}
-writeOGR(Iraq_Syria_joined, "Shapefiles/Iraq_Syria_merged", "Iraq_Syria_joined", driver = "ESRI Shapefile")
-```
 
